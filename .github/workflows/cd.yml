@@ -6,7 +6,7 @@ on:
 
 env:
   REGISTRY: ${{ vars.REGISTRY || 'docker.io' }}
-  IMAGE_NAME: pg_back
+  IMAGE_NAME: ${{ github.repository }}
   TARGET_PLATFORMS: linux/amd64,linux/arm64
 
 jobs:
