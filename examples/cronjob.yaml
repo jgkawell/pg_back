@@ -1,0 +1,32 @@
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: backup
+  namespace: postgres
+spec:
+  # run at 1am every day
+  schedule: '0 1 * * *'
+  jobTemplate:
+    spec:
+      template:
+        metadata:
+          annotations:
+            # disable istio on the pod due to this issue:
+            # https://github.com/istio/istio/issues/11659
+            sidecar.istio.io/inject: "false"
+        spec:
+          containers:
+            - name: backup
+              image: jgkawell/pg_back:latest
+              imagePullPolicy: IfNotPresent
+              command: ["/bin/sh","-c"]
+              args: ["/usr/bin/pg_back -c /var/pg_back.conf"]
+              volumeMounts:
+                - mountPath: '/var'
+                  name: config
+                  readOnly: true
+          restartPolicy: Never
+          volumes:
+            - name: config
+              secret:
+                secretName: backup-config
